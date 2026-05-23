@@ -3,6 +3,22 @@ let consultations = [];
 let knownIds = new Set();
 let selectedItem = null;
 
+// 📝 날짜 및 시간 포맷 변환 헬퍼 함수 (ISOString -> YYYY-MM-DD HH:mm 한국 표준시로 파싱)
+function formatDateTime(isoString) {
+  if (!isoString) return "-";
+  try {
+    const date = new Date(isoString);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+  } catch (e) {
+    return isoString;
+  }
+}
+
 // 페이지 로드 시 시작
 document.addEventListener("DOMContentLoaded", () => {
   switchTab('board');
@@ -157,6 +173,7 @@ function renderKanbanBoard() {
       <div class="card-body">
         <div style="font-weight:600;">📞 ${item.clientPhone}</div>
         <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📍 ${item.address}</div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">📝 접수일시: ${formatDateTime(item.createdAt)}</div>
         <div style="font-weight: 600; color: ${item.isEmergency ? '#ef4444' : 'var(--primary)'}; font-size: 0.85rem; margin-top: 4px;">
           🕒 ${item.isEmergency ? '🚨 당일 즉시 긴급 출동 요청 건' : `방문요청: ${item.reservedDate} (${item.reservedTime})`}
         </div>
@@ -214,6 +231,7 @@ function updateModalContent() {
   document.getElementById('modal-reserved-time').innerHTML = item.isEmergency 
     ? `<span style="color:#ef4444; font-weight:700;">🚨 긴급 당일 즉시 방문 요청 (긴급 출장비 150,000원 발생 동의완료)</span>`
     : `${item.reservedDate} (${item.reservedTime})`;
+  document.getElementById('modal-created-at').textContent = formatDateTime(item.createdAt);
   document.getElementById('modal-location').textContent = item.location;
   document.getElementById('modal-symptom').textContent = item.symptom;
   document.getElementById('modal-details').textContent = item.details || '상세 입력 내용 없음';
