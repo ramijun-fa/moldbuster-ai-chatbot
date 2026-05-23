@@ -792,3 +792,116 @@ header {
   border: 1px solid rgba(239, 68, 68, 0.4) !important;
   font-weight: 700;
 }
+
+/* ==========================================
+   5. 전문가용 대시보드 (Admin) 모바일/태블릿 반응형 고도화
+   ========================================== */
+@media (max-width: 1024px) {
+  .admin-container {
+    grid-template-columns: 1fr; /* 사이드바를 위로 올리고 메인을 아래로 */
+    min-height: auto;
+  }
+
+  .admin-sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border-glass);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .sidebar-menu {
+    flex-direction: row; /* 메뉴를 가로로 배치 */
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .menu-item {
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .admin-sidebar div {
+    display: none !important; /* 모바일 사이드바 하단 QR안내 숨김 */
+  }
+
+  .admin-main {
+    padding: 24px 16px;
+    margin: 10px !important;
+  }
+
+  .board-columns {
+    grid-template-columns: repeat(2, 1fr); /* 태블릿에서는 2열로 */
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .dashboard-header div:last-child {
+    width: 100%;
+    text-align: center;
+  }
+
+  .board-columns {
+    grid-template-columns: 1fr; /* 모바일 세로 화면에서는 1열로 쭉 배열 */
+    gap: 20px;
+  }
+
+  .column-panel {
+    min-height: auto; /* 내용물이 없을 때 불필요한 높이 낭비 방지 */
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .settings-section {
+    padding: 10px 0;
+  }
+
+  .settings-card {
+    padding: 20px 15px;
+  }
+}
+
+@media (max-width: 600px) {
+  .modal-window {
+    padding: 16px;
+    width: 96%;
+    max-height: 90vh;
+    border-radius: 20px;
+  }
+
+  .modal-grid {
+    grid-template-columns: 1fr; /* 모바일 모달 상세는 무조건 1열 세로 스크롤 */
+    gap: 20px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.25rem;
+  }
+
+  #action-buttons-box {
+    flex-direction: column; /* 상태 조작 버튼 세로 배치 */
+    width: 100%;
+    gap: 10px;
+  }
+
+  #action-buttons-box button {
+    width: 100%;
+    margin: 0 !important;
+  }
+
+  #btn-delete-consultation {
+    width: 100%;
+    justify-content: center;
+  }
+}
