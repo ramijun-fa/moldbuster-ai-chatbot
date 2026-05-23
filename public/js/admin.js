@@ -246,14 +246,35 @@ function updateModalContent() {
   else if (item.status === '시공중') badge.classList.add('tag-ongoing');
   else if (item.status === '완료') badge.classList.add('tag-completed');
 
-  // 사진 표시
-  const photoImg = document.getElementById('modal-photo-img');
-  if (item.photoUrl) {
-    photoImg.src = item.photoUrl;
-    photoImg.style.display = 'block';
+  // 🌟 다중 사진 표시 및 격자 갤러리 렌더링
+  const photosGrid = document.getElementById('modal-photos-grid');
+  photosGrid.innerHTML = ''; // 초기화
+
+  const targetUrls = item.photoUrls || (item.photoUrl ? [item.photoUrl] : []);
+
+  if (targetUrls.length > 0) {
+    targetUrls.forEach(url => {
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = '하자 현장 사진';
+      img.className = 'modal-photo';
+      img.style.cssText = 'width: 100%; height: 110px; object-fit: cover; border-radius: 12px; cursor: pointer; border: 1px solid var(--border-glass); transition: transform 0.2s;';
+      
+      // 이미지 호버 효과 동적 제어
+      img.addEventListener('mouseenter', () => img.style.transform = 'scale(1.04)');
+      img.addEventListener('mouseleave', () => img.style.transform = 'scale(1.0)');
+      
+      // 클릭 시 큰 새 창(라이트박스 대체)으로 상세 조회 연동
+      img.onclick = () => window.open(url, '_blank');
+      
+      photosGrid.appendChild(img);
+    });
   } else {
-    photoImg.style.display = 'none';
-    photoImg.src = '';
+    // 사진이 한 장도 등록되지 않은 경우 친절하고 고급스러운 안내 메시지 출력
+    const emptyMsg = document.createElement('div');
+    emptyMsg.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 25px; color: var(--text-muted); font-size: 0.85rem; border: 1px dashed var(--border-glass); border-radius: 12px; background: rgba(255,255,255,0.01);';
+    emptyMsg.innerHTML = '📭 고객이 등록한 사진이 없습니다.';
+    photosGrid.appendChild(emptyMsg);
   }
 
   // AI 요약 렌더링 (마크다운 파싱)

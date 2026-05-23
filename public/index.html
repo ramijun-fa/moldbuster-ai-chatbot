@@ -194,11 +194,15 @@
             
             <div class="upload-zone" id="drop-zone" onclick="document.getElementById('photo-input').click()">
               <span class="upload-icon">📸</span>
-              <span class="upload-label" id="upload-label-text">여기를 터치하여 사진을 촬영하거나 선택하세요.</span>
-              <span style="font-size: 0.8rem; color: var(--text-muted);">(10MB 이하 이미지 파일)</span>
-              <img id="image-preview" class="upload-preview" alt="업로드 이미지 미리보기">
+              <span class="upload-label" id="upload-label-text">여기를 터치하여 현장 사진을 여러 장 선택하세요.</span>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">(최대 5장 등록 가능, AI를 위해 여러 각도로 올려주세요)</span>
+              
+              <!-- 🌟 다중 사진 미리보기 갤러리 그리드 -->
+              <div id="image-previews-container" style="display: none; width: 100%; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 8px; margin-top: 15px;" onclick="event.stopPropagation()">
+                <!-- JS에서 동적으로 다중 사진 썸네일 및 개별삭제 렌더링 -->
+              </div>
             </div>
-            <input type="file" id="photo-input" style="display: none;" accept="image/*" onchange="previewImage(this)">
+            <input type="file" id="photo-input" style="display: none;" accept="image/*" multiple onchange="previewImages(this)">
           </div>
 
           <div style="display: flex; gap: 10px; margin-top: 20px;">

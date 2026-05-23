@@ -204,8 +204,8 @@ function simulateNotification(consultation, summary) {
 
 // --- API 라우트 정의 ---
 
-// 1. 상담 접수 API (고객용)
-app.post('/api/consultations', upload.single('photo'), async (req, res) => {
+// 1. 상담 접수 API (고객용 다중 사진 업로드 및 압축 지원 연동)
+app.post('/api/consultations', upload.array('photos', 5), async (req, res) => {
   try {
     const { clientName, clientPhone, address, location, symptom, details, reservedDate, reservedTime, isEmergency } = req.body;
 
@@ -248,6 +248,10 @@ app.post('/api/consultations', upload.single('photo'), async (req, res) => {
       }
     }
     
+    // 업로드된 다중 파일 정보 수합
+    const photoUrls = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
+    const photoUrl = photoUrls.length > 0 ? photoUrls[0] : null; // 기존 싱글 뷰 하위 호환 유지
+    
     // 신규 상담 데이터 생성
     const newId = 'C-' + Date.now();
     const newConsultation = {
@@ -260,16 +264,17 @@ app.post('/api/consultations', upload.single('photo'), async (req, res) => {
       details: details || "",
       reservedDate: emergencyFlag ? "당일 긴급 방문" : (reservedDate || ""),
       reservedTime: emergencyFlag ? "즉시 출동 요망" : (reservedTime || ""),
-      photoUrl: req.file ? `/uploads/${req.file.filename}` : null,
+      photoUrl: photoUrl,
+      photoUrls: photoUrls, // 🌟 다중 이미지 URL 배열 보관
       status: "접수완료", // 접수완료 -> 방문확정 -> 시공중 -> 완료
       isEmergency: emergencyFlag,
       createdAt: new Date().toISOString(),
       aiSummary: "AI 접수원이 요약을 작성 중입니다..."
     };
 
-    // 파일 업로드 처리 정보
-    const imagePath = req.file ? req.file.path : null;
-    const mimeType = req.file ? req.file.mimetype : null;
+    // 파일 업로드 처리 정보 (AI 분석용은 첫 번째 사진 기준 공급)
+    const imagePath = req.files && req.files.length > 0 ? req.files[0].path : null;
+    const mimeType = req.files && req.files.length > 0 ? req.files[0].mimetype : null;
 
     // AI 접수 요약 생성
     let aiSummary = "";
@@ -325,22 +330,25 @@ app.delete('/api/consultations/:id', (req, res) => {
     return res.status(404).json({ error: "해당 상담 건을 찾을 수 없습니다." });
   }
   
-  // 데이터 삭제 및 관련 이미지 파일 디스크 정리
+  // 데이터 삭제 및 관련 모든 업로드 사진 파일 디스크에서 물리적 청소
   const item = consultations[index];
-  if (item.photoUrl) {
-    // photoUrl 형식: /uploads/123-456.jpg -> 실제 uploads 경로 매핑
-    const photoName = path.basename(item.photoUrl);
-    const photoPath = path.join(UPLOADS_DIR, photoName);
-    
-    if (fs.existsSync(photoPath)) {
-      try {
-        fs.unlinkSync(photoPath);
-        console.log(`🗑️ 디스크에서 실제 업로드 사진 파일 삭제 완료: ${photoPath}`);
-      } catch (err) {
-        console.error("실제 업로드 사진 파일 삭제 중 에러 발생:", err);
+  const urlsToDelete = item.photoUrls || (item.photoUrl ? [item.photoUrl] : []);
+  
+  urlsToDelete.forEach(url => {
+    if (url) {
+      const photoName = path.basename(url);
+      const photoPath = path.join(UPLOADS_DIR, photoName);
+      
+      if (fs.existsSync(photoPath)) {
+        try {
+          fs.unlinkSync(photoPath);
+          console.log(`🗑️ 디스크에서 업로드 사진 물리적 삭제 완수: ${photoPath}`);
+        } catch (err) {
+          console.error("사진 청소 중 에러 발생:", err);
+        }
       }
     }
-  }
+  });
 
   consultations.splice(index, 1);
   writeJSON(CONSULTATIONS_FILE, consultations);
