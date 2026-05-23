@@ -555,7 +555,7 @@ async function submitConsultation() {
   // 로딩 화면 전환
   document.getElementById('step-4-content').style.display = 'none';
   document.getElementById('ai-instructions').innerHTML = 
-    `✍️ AI 접수원이 사진과 하자를 정밀하게 판독하여 전문가님 전송용 <b>요약 보고서</b>를 짓고 있습니다. 잠시만 기다려 주세요!`;
+    `✍️ 접수 데이터를 실시간으로 전문가 시스템에 전송하고, 안전한 <b>방문 안내 보고서</b>를 구성하고 있습니다. 잠시만 기다려 주세요!`;
   
   const indicator = document.querySelector('.step-indicator');
   if (indicator) indicator.style.display = 'none';

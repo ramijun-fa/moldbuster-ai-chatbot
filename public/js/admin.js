@@ -178,7 +178,7 @@ function renderKanbanBoard() {
           🕒 ${item.isEmergency ? '🚨 당일 즉시 긴급 출동 요청 건' : `방문요청: ${item.reservedDate} (${item.reservedTime})`}
         </div>
         <div class="card-summary-preview" style="${item.isEmergency ? 'background:rgba(239,68,68,0.06); border-left-color:#ef4444;' : ''}">
-          🤖 AI 접수: ${firstLineSummary.replace('- ', '').trim()}
+          📝 자동접수: ${firstLineSummary.replace('- ', '').trim()}
         </div>
       </div>
     `;

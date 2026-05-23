@@ -79,90 +79,27 @@ const upload = multer({
 });
 
 // Gemini AI 연동 헬퍼 함수
-// Gemini AI 연동 헬퍼 함수
-async function generateAISummary(consultation, imagePath, mimeType) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  
-  // 🌟 규칙 기반 우아한 요약본을 기본 리턴값으로 미리 정의 (API가 터져도 이 형태가 출력됨)
-  const fallbackSummary = `### [실시간 접수 요약 보고서]
-- **접수 정보**: **${consultation.location}** 부위 / **${consultation.symptom}** 불편 접수 완료.
-${consultation.details ? '- **고객 메모**: ' + consultation.details : ''}
-
-### [접수 내용 상세 관찰]
-- **의심 하자**: 결로형 곰팡이 번식 및 단열재 열화, 혹은 누수 진단 필요.
-- **예상 원인 분석**: 접수하신 내용(${consultation.location}의 ${consultation.symptom})으로 미루어 보아 실내외 온도 차에 의한 결로 현상이나 외벽 크랙/배관 미세 누수의 가능성이 존재합니다.
-- **방문 시 권장 진단**: 현장 방문 시 해당 부위의 **벽체 함수율(습도) 정밀 측정** 및 **열화상 카메라를 통한 단열재 결손 여부** 우선 확인 권장.
+// 🌟 접수 안내서 및 향후 일정 진행 가이드 생성 헬퍼 함수 (Gemini API 의존을 제거하여 100% 신뢰성 보장)
+function generateConsultationGuide(consultation) {
+  return `### [🔔 접수가 정상 완료되었습니다]
+- **접수 장소**: **${consultation.location}**
+- **불편 증상**: **${consultation.symptom}**
+- **고객 성함**: **${consultation.clientName}**님 (${consultation.clientPhone})
 
 ---
-💡 *본 보고서는 간이 접수 데이터를 기반으로 자동 작성되었습니다. 현장 방문 시 정밀 검측을 거쳐 최종 진단 및 공사 견적을 산출해 드립니다.*`;
 
-  if (!apiKey || apiKey.trim() === '') {
-    console.log("⚠️ GEMINI_API_KEY가 없습니다. 안전 모드 규칙 기반 요약본을 제공합니다.");
-    return fallbackSummary;
-  }
+### [📅 향후 진행 및 방문 일정 안내]
+1. **전문가 접수서 검토 (실시간)**
+   - 현장 시공 중이신 전문가에게 고객님의 접수 상세서와 사진이 즉각 안전하게 전달되었습니다.
+2. **해피콜 및 일정 조율 (신속 연락)**
+   - 전문가가 시공 동선을 대조하여 **당일 혹은 늦어도 24시간 이내**에 직접 전화를 드려 방문 시간을 최종 조율합니다.
+3. **현장 방문 및 정밀 진단**
+   - 약속된 일정에 전문가가 현장을 방문하여 **벽체 습도 측정 및 열화상 카메라 분석**을 거쳐 정밀 원인 진단을 진행합니다.
+4. **견적 산출 및 시공 확정**
+   - 진단 결과를 바탕으로 정확한 공사비를 산출하며, 시공 확정 시 **방문 출장비는 공사비에서 전액 차감(공제)**해 드립니다.
 
-  try {
-    const cleanedKey = apiKey.trim();
-    const genAI = new GoogleGenerativeAI(cleanedKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    let contents = [];
-    
-    // 프롬프트 작성 - 친절한 접수원 페르소나 및 전문가 전달용 요약 형식
-    const prompt = `
-당신은 곰팡이 진단 및 단열 시공 전문 업체 "몰드버스터(MoldBuster)"의 친절한 "AI 접수원"입니다.
-고객이 하자 부위, 증상, 상세 입력사항을 제출하고 현장 사진을 보냈습니다.
-전문가(시공업자)가 바쁜 현장 업무 중에도 한눈에 직관적으로 문제를 파악할 수 있도록 접수 내용을 전문적이고 일목요연하게 요약해 주세요.
-
-[고객 입력 정보]
-- 하자 발생 공간/위치: ${consultation.location}
-- 하자의 증상: ${consultation.symptom}
-- 고객이 남긴 설명: ${consultation.details || '없음'}
-
-[작성 가이드라인]
-1. 전문가 전달용 요약 (100자 내외, 간결하게): 시공업자가 급하게 운전 중이거나 작업 중일 때 문자 알림으로 바로 상황을 파악할 수 있는 핵심 요약입니다.
-2. AI 접수 분석 리포트: 
-   - 업로드된 사진과 증상을 매칭하여 어떤 하자가 의심되는지 곰팡이/단열 관점에서 분석 의견(예: 배관 누수 가능성 vs 벽체 결로 가능성 등)을 '전문가용 참고사항'으로 3줄 내외 정리해 주세요.
-   - 단, 고객에게 확정적으로 진단하는 것이 아니며 "이러한 점이 관찰되니 방문하여 정밀 진단(점검)이 필요하다"는 뉘앙스를 담아야 합니다.
-
-답변은 반드시 한국어로 작성하고 아래 마크다운 템플릿 형식을 엄격하게 준수해 주세요:
-
-### [전문가 전달용 요약]
-- (여기에 간결하게 한 줄 요약 작성)
-
-### [AI 접수원의 관찰 내용]
-- **의심 하자**: (예: 벽체 결로에 의한 곰팡이 의심 / 배관 누수 곰팡이 의심 등)
-- **주요 관찰**: (사진과 증상을 바탕으로 분석한 물리적 양상 기술)
-- **방문 시 권장 확인 항목**: (전문가가 현장에 가서 먼저 들여다봐야 할 위치 추천)
-`;
-
-    contents.push(prompt);
-
-    if (imagePath && fs.existsSync(imagePath)) {
-      const imageBuffer = fs.readFileSync(imagePath);
-      contents.push({
-        inlineData: {
-          data: imageBuffer.toString("base64"),
-          mimeType: mimeType || "image/jpeg"
-        }
-      });
-    }
-
-    // 🌟 2.5초 초고속 타임아웃 레이스 결합 (구글 API 통신 지연 시 100% 무정지 즉각 반환)
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Gemini API 호출 시간 초과 (2.5초)")), 2500)
-    );
-
-    const apiPromise = model.generateContent(contents);
-    const result = await Promise.race([apiPromise, timeoutPromise]);
-    const response = await result.response;
-    return response.text();
-
-  } catch (error) {
-    console.error("AI 요약 생성 중 오류 발생 (안전 모드 규칙 기반 대체):", error);
-    // 🌟 구글 API 에러 발생 시, 에러 문구를 화면에 뱉지 않고 수려한 규칙 요약본을 우아하게 대신 반환!
-    return fallbackSummary;
-  }
+---
+💡 *몰드버스터는 고객님의 곰팡이/단열 문제를 신속하고 완벽히 해결하기 위해 최선을 다하고 있습니다. 조금만 기다려 주시면 전문가가 빠르게 전화를 드리겠습니다!*`;
 }
 
 // 가상 SMS/카카오톡 발송 시뮬레이터
@@ -272,11 +209,7 @@ app.post('/api/consultations', upload.array('photos', 5), async (req, res) => {
       aiSummary: "AI 접수원이 요약을 작성 중입니다..."
     };
 
-    // 파일 업로드 처리 정보 (AI 분석용은 첫 번째 사진 기준 공급)
-    const imagePath = req.files && req.files.length > 0 ? req.files[0].path : null;
-    const mimeType = req.files && req.files.length > 0 ? req.files[0].mimetype : null;
-
-    // AI 접수 요약 생성
+    // 접수 안내서 및 향후 일정 가이드 생성 (즉시 실행)
     let aiSummary = "";
     if (emergencyFlag) {
       aiSummary = `### [🚨 긴급 당일 방문 요청 접수]
@@ -284,7 +217,7 @@ app.post('/api/consultations', upload.array('photos', 5), async (req, res) => {
 - **현재 상황 요약**: ${details || '즉시 현장 전화 요망'}
 - **전문가 가이드**: 당일 즉시 방문 처리가 약속된 긴급 건입니다. 즉시 전화를 걸어 현장 상태를 체크하고 출발 시간을 잡으십시오.`;
     } else {
-      aiSummary = await generateAISummary(newConsultation, imagePath, mimeType);
+      aiSummary = generateConsultationGuide(newConsultation);
     }
     newConsultation.aiSummary = aiSummary;
 
