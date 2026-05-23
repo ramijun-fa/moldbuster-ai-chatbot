@@ -224,7 +224,7 @@ app.post('/api/consultations', upload.single('photo'), async (req, res) => {
       if (hasEmergencyToday) {
         return res.status(400).json({
           error: "LIMIT_EXCEEDED",
-          message: "금일 긴급 당일 즉시 방문 요청이 이미 마감되었습니다. 일반 점검 예약을 이용해 주시기 바랍니다."
+          message: "금일 긴급 당일 즉시 방문 요청이 이미 마감되었습니다. 상담 및 방문요청예약을 이용해 주시기 바랍니다."
         });
       }
     }

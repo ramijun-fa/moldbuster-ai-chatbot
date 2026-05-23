@@ -879,7 +879,7 @@ async function submitEmergencyConsultation() {
       if (emergencyLoadingTimeout) clearTimeout(emergencyLoadingTimeout);
       const err = await response.json();
       if (err.error === 'LIMIT_EXCEEDED') {
-        alert("🚨 당일 긴급 방문 접수가 마감되었습니다.\n\n금일 긴급 방문 예약은 이미 조기 마감되었습니다. 입력하신 내용을 바탕으로 '일반 점검 예약(출장비 3만원)'으로 자동 전환해 접수를 진행해 드릴 테니 다음 단계로 이동해 주세요.");
+        alert("🚨 당일 긴급 방문 접수가 마감되었습니다.\n\n금일 긴급 방문 예약은 이미 조기 마감되었습니다. 입력하신 내용을 바탕으로 '상담 및 방문요청예약(출장비 3만원)'으로 자동 전환해 접수를 진행해 드릴 테니 다음 단계로 이동해 주세요.");
         
         // 일반 접수로 강제 전환
         toggleConsultationType('normal');
