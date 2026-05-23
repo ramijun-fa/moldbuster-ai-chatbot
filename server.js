@@ -342,6 +342,15 @@ app.post('/api/settings', (req, res) => {
 
 // 서버 기동
 app.listen(PORT, () => {
+  const rawKey = process.env.GEMINI_API_KEY || '';
+  const cleanKey = rawKey.trim();
+  console.log(`
+🔑 [배포 서버 API Key 검증 상태]
+- API Key 변수 등록 여부: ${rawKey ? '✅ 등록됨' : '❌ 누락됨'}
+- API Key 실제 글자수: ${cleanKey.length} 자 (정상적인 구글 키는 약 39자 내외)
+- 마스킹 확인: ${cleanKey ? cleanKey.substring(0, 8) + '...' + cleanKey.substring(cleanKey.length - 4) : '없음'}
+  `);
+
   console.log(`
 🚀  ==========================================================
 🚀  '시공링크' 상담 자동화 서버가 켜졌습니다!
