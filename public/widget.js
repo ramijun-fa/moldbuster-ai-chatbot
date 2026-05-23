@@ -182,4 +182,13 @@
     tooltip.classList.remove('show');
   }, 7500);
 
+  // 4. iframe 자식 창으로부터 위젯 닫기 요청 수신 (postMessage 연동)
+  window.addEventListener('message', function (event) {
+    if (event.data && event.data.type === 'CLOSE_SIGONG_WIDGET') {
+      isOpen = false;
+      widgetContainer.classList.remove('active');
+      widgetBtn.innerHTML = '<span class="widget-icon">🤖</span>';
+    }
+  });
+
 })();

@@ -963,3 +963,8 @@ function shareSingleItem(event, id) {
   }
 }
 
+// 🌟 위젯 창 닫기 (부모 창인 widget.js와 통신)
+function closeWidgetWindow() {
+  window.parent.postMessage({ type: 'CLOSE_SIGONG_WIDGET' }, '*');
+}
+

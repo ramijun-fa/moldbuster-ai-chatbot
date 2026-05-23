@@ -9,13 +9,19 @@
 <body>
 
   <!-- 헤더 영역 -->
-  <header>
-    <a href="#" class="logo" style="white-space: nowrap;">
-      <span>몰드버스터</span> AI 접수처
-    </a>
-    <div style="font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;">
-      ⚡ 곰팡이/결로/단열 정밀 분석
+  <header style="position: relative; display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 15px 20px;">
+    <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+      <a href="#" class="logo" style="white-space: nowrap; margin: 0; line-height: 1.2;">
+        <span>몰드버스터</span> AI 접수처
+      </a>
+      <div style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; margin-top: 4px; line-height: 1;">
+        ⚡ 곰팡이/결로/단열 정밀 분석
+      </div>
     </div>
+    <!-- 🌟 모바일 위젯 대응을 위한 닫기 버튼 (클릭 시 부모 위젯 닫기) -->
+    <button type="button" id="btn-close-widget" style="background: none; border: none; color: var(--text-muted); font-size: 1.6rem; cursor: pointer; padding: 4px 10px; display: flex; align-items: center; justify-content: center; transition: color 0.2s; line-height: 1; outline: none;" onclick="closeWidgetWindow()">
+      ✕
+    </button>
   </header>
 
   <!-- 메인 모바일 카드 컨테이너 -->
