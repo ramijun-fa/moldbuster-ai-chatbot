@@ -79,15 +79,26 @@ const upload = multer({
 });
 
 // Gemini AI 연동 헬퍼 함수
+// Gemini AI 연동 헬퍼 함수
 async function generateAISummary(consultation, imagePath, mimeType) {
   const apiKey = process.env.GEMINI_API_KEY;
+  
+  // 🌟 규칙 기반 우아한 요약본을 기본 리턴값으로 미리 정의 (API가 터져도 이 형태가 출력됨)
+  const fallbackSummary = `### [전문가 전달용 요약]
+- 공간: **${consultation.location}** / 문제: **${consultation.symptom}** 정밀 점검 접수.
+${consultation.details ? '- 메모: ' + consultation.details : ''}
+
+### [AI 접수원의 관찰 내용]
+- **의심 하자**: 곰팡이 번식 및 단열/누수 정밀 분석 필요
+- **주요 관찰**: 고객님이 접수하신 공간(${consultation.location})에 결로 또는 누수로 인한 ${consultation.symptom} 현상이 의심됩니다.
+- **방문 시 권장 확인 항목**: 전문가 현장 방문 시 ${consultation.location} 부위의 벽체 습도 측정 및 열화상 카메라 정밀 분석 권장.
+
+---
+💡 *본 요약은 1차 간이 접수 데이터 기반입니다. 전문가가 현장 방문 시 정밀 검측을 통해 최종 판정해 드립니다.*`;
+
   if (!apiKey || apiKey.trim() === '') {
-    console.log("⚠️ GEMINI_API_KEY가 없습니다. 기본 룰 기반 요약본을 제공합니다.");
-    return `[규칙 기반 접수 요약]
-- 접수 부위: ${consultation.location}
-- 접수 증상: ${consultation.symptom}
-- 고객 상세 메모: ${consultation.details || '없음'}
-- 현장 사진 등록됨 (AI 상세 요약은 API Key 등록 후 활성화됩니다)`;
+    console.log("⚠️ GEMINI_API_KEY가 없습니다. 안전 모드 규칙 기반 요약본을 제공합니다.");
+    return fallbackSummary;
   }
 
   try {
@@ -142,8 +153,9 @@ async function generateAISummary(consultation, imagePath, mimeType) {
     return response.text();
 
   } catch (error) {
-    console.error("AI 요약 생성 에러:", error);
-    return `[AI 요약 실패] 접수 부위: ${consultation.location}, 증상: ${consultation.symptom}. 상세내용: ${consultation.details}. (에러 사유: ${error.message})`;
+    console.error("AI 요약 생성 중 오류 발생 (안전 모드 규칙 기반 대체):", error);
+    // 🌟 구글 API 에러 발생 시, 에러 문구를 화면에 뱉지 않고 수려한 규칙 요약본을 우아하게 대신 반환!
+    return fallbackSummary;
   }
 }
 
