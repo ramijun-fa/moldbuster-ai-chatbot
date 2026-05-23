@@ -84,17 +84,17 @@ async function generateAISummary(consultation, imagePath, mimeType) {
   const apiKey = process.env.GEMINI_API_KEY;
   
   // 🌟 규칙 기반 우아한 요약본을 기본 리턴값으로 미리 정의 (API가 터져도 이 형태가 출력됨)
-  const fallbackSummary = `### [전문가 전달용 요약]
-- 공간: **${consultation.location}** / 문제: **${consultation.symptom}** 정밀 점검 접수.
-${consultation.details ? '- 메모: ' + consultation.details : ''}
+  const fallbackSummary = `### [실시간 접수 요약 보고서]
+- **접수 정보**: **${consultation.location}** 부위 / **${consultation.symptom}** 불편 접수 완료.
+${consultation.details ? '- **고객 메모**: ' + consultation.details : ''}
 
-### [AI 접수원의 관찰 내용]
-- **의심 하자**: 곰팡이 번식 및 단열/누수 정밀 분석 필요
-- **주요 관찰**: 고객님이 접수하신 공간(${consultation.location})에 결로 또는 누수로 인한 ${consultation.symptom} 현상이 의심됩니다.
-- **방문 시 권장 확인 항목**: 전문가 현장 방문 시 ${consultation.location} 부위의 벽체 습도 측정 및 열화상 카메라 정밀 분석 권장.
+### [접수 내용 상세 관찰]
+- **의심 하자**: 결로형 곰팡이 번식 및 단열재 열화, 혹은 누수 진단 필요.
+- **예상 원인 분석**: 접수하신 내용(${consultation.location}의 ${consultation.symptom})으로 미루어 보아 실내외 온도 차에 의한 결로 현상이나 외벽 크랙/배관 미세 누수의 가능성이 존재합니다.
+- **방문 시 권장 진단**: 현장 방문 시 해당 부위의 **벽체 함수율(습도) 정밀 측정** 및 **열화상 카메라를 통한 단열재 결손 여부** 우선 확인 권장.
 
 ---
-💡 *본 요약은 1차 간이 접수 데이터 기반입니다. 전문가가 현장 방문 시 정밀 검측을 통해 최종 판정해 드립니다.*`;
+💡 *본 보고서는 간이 접수 데이터를 기반으로 자동 작성되었습니다. 현장 방문 시 정밀 검측을 거쳐 최종 진단 및 공사 견적을 산출해 드립니다.*`;
 
   if (!apiKey || apiKey.trim() === '') {
     console.log("⚠️ GEMINI_API_KEY가 없습니다. 안전 모드 규칙 기반 요약본을 제공합니다.");
@@ -148,7 +148,13 @@ ${consultation.details ? '- 메모: ' + consultation.details : ''}
       });
     }
 
-    const result = await model.generateContent(contents);
+    // 🌟 2.5초 초고속 타임아웃 레이스 결합 (구글 API 통신 지연 시 100% 무정지 즉각 반환)
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Gemini API 호출 시간 초과 (2.5초)")), 2500)
+    );
+
+    const apiPromise = model.generateContent(contents);
+    const result = await Promise.race([apiPromise, timeoutPromise]);
     const response = await result.response;
     return response.text();
 

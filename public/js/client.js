@@ -779,6 +779,44 @@ function backToMain() {
   }, 250);
 }
 
+// 🌟 범용 클립보드 복사 헬퍼 함수
+function copyToClipboard(text, successMessage) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      alert(successMessage);
+    }).catch(err => {
+      fallbackCopyTextToClipboard(text, successMessage);
+    });
+  } else {
+    fallbackCopyTextToClipboard(text, successMessage);
+  }
+}
+
+// 구형 및 iframe 환경용 강제 돔 복사 헬퍼 함수
+function fallbackCopyTextToClipboard(text, successMessage) {
+  const tempInput = document.createElement('textarea');
+  tempInput.value = text;
+  // iOS 대응 및 화면 스크롤 방지용 스타일 세팅
+  tempInput.style.top = '0';
+  tempInput.style.left = '0';
+  tempInput.style.position = 'fixed';
+  tempInput.style.opacity = '0';
+  document.body.appendChild(tempInput);
+  tempInput.focus();
+  tempInput.select();
+  try {
+    const successful = document.execCommand('copy');
+    if (successful) {
+      alert(successMessage);
+    } else {
+      alert("📋 링크 복사에 실패했습니다. 주소창의 URL을 직접 복사해 주세요.");
+    }
+  } catch (err) {
+    alert("📋 링크 복사에 실패했습니다. 주소창의 URL을 직접 복사해 주세요.");
+  }
+  document.body.removeChild(tempInput);
+}
+
 // 🌟 고유 접수 조회 링크 복사 및 공유 API 연동
 function copyStatusLink() {
   if (!latestConsultationId) {
@@ -787,28 +825,20 @@ function copyStatusLink() {
   }
   
   const shareUrl = `${window.location.origin}/index.html?id=${latestConsultationId}`;
+  const successMsg = "🔗 고객님만의 [고유 상태조회 링크]가 클립보드에 복사되었습니다!\n\n카카오톡 '나에게 보내기' 또는 스마트폰 메모장에 붙여넣어 보관하시면, 이 창을 나가거나 브라우저를 닫아도 언제든지 실시간으로 접수 상태를 모니터링하실 수 있습니다.";
   
-  // 스마트폰 모바일 OS 웹 공유 API (navigator.share) 우선 지원
+  // 스마트폰 모바일 OS 웹 공유 API (navigator.share) 우선 시도하되, iframe/보안 정책 등으로 실패 시 100% 클립보드 복사로 대응!
   if (navigator.share) {
     navigator.share({
       title: '몰드버스터 실시간 예약 현황',
       text: '제출하신 몰드버스터 곰팡이/단열 진단 상태를 실시간 확인하고 보관해 보세요!',
       url: shareUrl
-    }).catch(err => console.log("공유 취소 또는 에러:", err));
-  } else {
-    // 일반 클립보드 복사 폴백
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      alert("🔗 고객님만의 [고유 상태조회 링크]가 클립보드에 복사되었습니다!\n\n카카오톡 '나에게 보내기' 또는 스마트폰 메모장에 붙여넣어 보관하시면, 이 창을 나가거나 브라우저를 닫아도 언제든지 실시간으로 접수 상태를 모니터링하실 수 있습니다.");
     }).catch(err => {
-      // 구형 모바일/브라우저 대응 복사 강제 수행
-      const tempInput = document.createElement('input');
-      tempInput.value = shareUrl;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempInput);
-      alert("🔗 고객님만의 [고유 상태조회 링크]가 복사되었습니다!\n카카오톡이나 메모장에 보관해 주세요.");
+      console.log("Web Share 실패 또는 차단됨, 클립보드 복사 가동:", err);
+      copyToClipboard(shareUrl, successMsg);
     });
+  } else {
+    copyToClipboard(shareUrl, successMsg);
   }
 }
 
@@ -914,25 +944,19 @@ function copyMultipleStatusLink() {
   
   const idStr = latestConsultationIds.join(',');
   const shareUrl = `${window.location.origin}/index.html?ids=${idStr}`;
+  const successMsg = "🔗 고객님만의 [전체 접수 목록 조회 링크]가 클립보드에 복사되었습니다!\n\n카카오톡 '나에게 보내기' 또는 스마트폰 메모장에 붙여넣어 보관하시면, 브라우저를 닫아도 언제든지 이 링크 하나로 전체 접수 내역 현황판에 바로 접속해 모니터링하실 수 있습니다.";
   
   if (navigator.share) {
     navigator.share({
       title: '몰드버스터 접수 목록 현황',
       text: `제출하신 몰드버스터 곰팡이/단열 접수 내역(${latestConsultationIds.length}건) 전체 상태를 한눈에 확인해 보세요!`,
       url: shareUrl
-    }).catch(err => console.log("공유 취소 또는 에러:", err));
-  } else {
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      alert("🔗 고객님만의 [전체 접수 목록 조회 링크]가 클립보드에 복사되었습니다!\n\n카카오톡 '나에게 보내기' 또는 스마트폰 메모장에 붙여넣어 보관하시면, 브라우저를 닫아도 언제든지 이 링크 하나로 전체 접수 내역 현황판에 바로 접속해 모니터링하실 수 있습니다.");
     }).catch(err => {
-      const tempInput = document.createElement('input');
-      tempInput.value = shareUrl;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempInput);
-      alert("🔗 고객님만의 [전체 접수 목록 조회 링크]가 복사되었습니다!\n카카오톡이나 메모장에 보관해 주세요.");
+      console.log("Web Share 실패 또는 차단됨, 클립보드 복사 가동:", err);
+      copyToClipboard(shareUrl, successMsg);
     });
+  } else {
+    copyToClipboard(shareUrl, successMsg);
   }
 }
 
@@ -941,25 +965,19 @@ function shareSingleItem(event, id) {
   event.stopPropagation(); // 카드 클릭(상세페이지 진입) 전파 차단
   
   const shareUrl = `${window.location.origin}/index.html?id=${id}`;
+  const successMsg = `🔗 접수 건 [${id}]의 개별 상태 조회 링크가 클립보드에 복사되었습니다!\n카카오톡이나 메모장에 보관해 주세요.`;
   
   if (navigator.share) {
     navigator.share({
       title: '몰드버스터 실시간 예약 현황',
       text: `제출하신 몰드버스터 접수 건(번호: ${id}) 상태를 실시간 확인하고 보관해 보세요!`,
       url: shareUrl
-    }).catch(err => console.log("공유 취소 또는 에러:", err));
-  } else {
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      alert(`🔗 접수 건 [${id}]의 개별 상태 조회 링크가 클립보드에 복사되었습니다!\n카카오톡이나 메모장에 보관해 주세요.`);
     }).catch(err => {
-      const tempInput = document.createElement('input');
-      tempInput.value = shareUrl;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempInput);
-      alert(`🔗 접수 건 [${id}]의 개별 상태 조회 링크가 복사되었습니다!\n카카오톡이나 메모장에 보관해 주세요.`);
+      console.log("Web Share 실패 또는 차단됨, 클립보드 복사 가동:", err);
+      copyToClipboard(shareUrl, successMsg);
     });
+  } else {
+    copyToClipboard(shareUrl, successMsg);
   }
 }
 

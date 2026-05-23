@@ -152,7 +152,7 @@
 
   const widgetContainer = document.createElement('div');
   widgetContainer.id = 'sigong-widget-container';
-  widgetContainer.innerHTML = `<iframe id="sigong-widget-iframe" src="${SERVER_URL}/index.html"></iframe>`;
+  widgetContainer.innerHTML = `<iframe id="sigong-widget-iframe" src="${SERVER_URL}/index.html" allow="web-share"></iframe>`;
 
   document.body.appendChild(widgetBtn);
   document.body.appendChild(tooltip);
