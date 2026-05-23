@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시공링크 - 전문가 상담 관리 대시보드</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* 대시보드에만 적용될 추가 스타일 */
+    .admin-main {
+      background: rgba(11, 19, 43, 0.3);
+      border-radius: 30px;
+      margin: 20px;
+      border: 1px solid var(--border-glass);
+      backdrop-filter: blur(10px);
+    }
+    .settings-card {
+      padding: 30px;
+      margin-top: 20px;
+    }
+    .form-checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glass);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: var(--transition-smooth);
+    }
+    .checkbox-label:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .checkbox-label input[type="checkbox"]:checked + span {
+      color: var(--primary);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 헤더 영역 -->
+  <header>
+    <a href="#" class="logo">
+      💼 <span>몰드버스터</span> 파트너 대시보드
+    </a>
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <span id="network-status" style="font-size: 0.85rem; color: var(--accent);">● 실시간 연결 중</span>
+      <button class="btn-premium btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="location.reload()">
+        새로고침
+      </button>
+    </div>
+  </header>
+
+  <!-- 대시보드 레이아웃 -->
+  <div class="admin-container">
+    
+    <!-- 사이드바 네비게이션 -->
+    <aside class="admin-sidebar">
+      <ul class="sidebar-menu">
+        <li class="menu-item active" id="menu-board" onclick="switchTab('board')">
+          📋 상담 & 시공 현황판
+        </li>
+        <li class="menu-item" id="menu-settings" onclick="switchTab('settings')">
+          ⚙️ 시공 및 알림 설정
+        </li>
+      </ul>
+      <div style="margin-top: 50px; padding: 20px; font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; border-top: 1px solid var(--border-glass);">
+        <b>📌 고객용 QR 링크</b><br>
+        현장 작업 중 전화가 왔을 때 전화를 끊은 뒤 문자로 아래 고객용 웹 링크를 발송해 주세요.<br>
+        <a href="/index.html" target="_blank" style="color: var(--primary); text-decoration: underline; display: block; margin-top: 5px;">
+          시공링크 접수처 열기 ➔
+        </a>
+      </div>
+    </aside>
+
+    <!-- 메인 대시보드 내용 -->
+    <main class="admin-main" id="admin-main-section">
+      
+      <!-- ==================== TAB 1: 칸반 보드 현황판 ==================== -->
+      <div id="tab-board-content">
+        <div class="dashboard-header">
+          <div>
+            <h1 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 5px;">실시간 상담 현황</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">고객이 접수한 일정 및 AI 요약을 확인하고 시공 일정을 관리하세요.</p>
+          </div>
+          <div style="background: rgba(58, 134, 255, 0.1); border: 1px dashed var(--primary); padding: 12px 20px; border-radius: 12px; font-size: 0.9rem;">
+            🔔 신규 접수 시 <b>대시보드 알림음</b>이 울립니다.
+          </div>
+        </div>
+
+        <!-- 칸반 보드 시스템 -->
+        <div class="board-columns">
+          
+          <!-- 컬럼 1: 접수완료 -->
+          <div class="glass-panel column-panel" style="border-top: 4px solid var(--status-pending);">
+            <div class="column-header">
+              <span class="column-title">⏳ 접수완료</span>
+              <span class="column-badge tag-pending" id="count-pending">0</span>
+            </div>
+            <div id="column-pending-list" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- JS 동적 카드 렌더링 -->
+            </div>
+          </div>
+
+          <!-- 컬럼 2: 방문확정 -->
+          <div class="glass-panel column-panel" style="border-top: 4px solid var(--status-confirmed);">
+            <div class="column-header">
+              <span class="column-title">📅 방문확정</span>
+              <span class="column-badge tag-confirmed" id="count-confirmed">0</span>
+            </div>
+            <div id="column-confirmed-list" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- JS 동적 카드 렌더링 -->
+            </div>
+          </div>
+
+          <!-- 컬럼 3: 시공중 -->
+          <div class="glass-panel column-panel" style="border-top: 4px solid var(--status-ongoing);">
+            <div class="column-header">
+              <span class="column-title">⚡ 시공진행</span>
+              <span class="column-badge tag-ongoing" id="count-ongoing">0</span>
+            </div>
+            <div id="column-ongoing-list" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- JS 동적 카드 렌더링 -->
+            </div>
+          </div>
+
+          <!-- 컬럼 4: 시공완료 -->
+          <div class="glass-panel column-panel" style="border-top: 4px solid var(--status-completed);">
+            <div class="column-header">
+              <span class="column-title">🎉 최종완료</span>
+              <span class="column-badge tag-completed" id="count-completed">0</span>
+            </div>
+            <div id="column-completed-list" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- JS 동적 카드 렌더링 -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ==================== TAB 2: 환경 설정 ==================== -->
+      <div id="tab-settings-content" style="display: none;">
+        <div class="settings-section">
+          <h1 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 5px;">설정 및 문자 자동화</h1>
+          <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 30px;">출장비 및 영업 가능 일정을 설정하고 자동 문자 발송 문구를 편집하세요.</p>
+
+          <form id="settings-form" onsubmit="event.preventDefault(); saveSettings();" class="glass-panel settings-card">
+            
+            <div class="form-group">
+              <label class="form-label" for="travelFee">기본 방문 정밀진단 출장비 (원)</label>
+              <input type="text" id="travelFee" class="form-input" placeholder="50,000">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">방문 및 시공 가능 요일</label>
+              <div class="form-checkbox-group">
+                <label class="checkbox-label"><input type="checkbox" name="availableDays" value="월"> <span>월요일</span></label>
+                <label class="checkbox-label"><input type="checkbox" name="availableDays" value="화"> <span>화요일</span></label>
+                <label class="checkbox-label"><input type="checkbox" name="availableDays" value="수"> <span>수요일</span></label>
+                <label class="checkbox-label"><input type="checkbox" name="availableDays" value="목"> <span>목요일</span></label>
+                <label class="checkbox-label"><input type="checkbox" name="availableDays" value="금"> <span>금요일</span></label>
+                <label class="checkbox-label"><input type="checkbox" name="availableDays" value="토"> <span>토요일</span></label>
+                <label class="checkbox-label"><input type="checkbox" name="availableDays" value="일"> <span>일요일</span></label>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 25px;">
+              <label class="form-label" for="availableHours">방문 예약 가능 시간대 (쉼표구분)</label>
+              <input type="text" id="availableHours" class="form-input" placeholder="09:00, 11:00, 13:00, 15:00, 17:00">
+              <span style="font-size: 0.8rem; color: var(--text-muted);">고객 예약 시 노출되는 방문 시간대 리스트입니다.</span>
+            </div>
+
+            <div class="form-group" style="margin-top: 25px;">
+              <label class="form-label" for="smsTemplate">접수 완료 시 자동 발송 가상 문자 문구</label>
+              <textarea id="smsTemplate" class="form-textarea" rows="4" placeholder="[시공링크] {고객명}님, 시공 상담 접수되었습니다. 요약: {요약}. 전문가가 조속히 연락드리겠습니다."></textarea>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">치환자 설명: {고객명} - 고객성함 / {요약} - AI 접수원 핵심 요약</span>
+            </div>
+
+            <button type="submit" class="btn-premium" style="width: 100%; margin-top: 30px;">
+              💾 설정 사항 저장 완료하기
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ==================== 상세 상담 내역 모달 팝업 ==================== -->
+  <div class="modal-overlay" id="detail-modal" onclick="closeModal(event)">
+    <div class="glass-panel modal-window" onclick="event.stopPropagation()">
+      
+      <div class="modal-header">
+        <div>
+          <span class="card-tag tag-pending" id="modal-status-badge" style="font-size: 0.85rem; padding: 4px 10px;">접수완료</span>
+          <h2 style="font-size: 1.5rem; font-weight: 700; margin-top: 8px;" id="modal-client-name">홍길동 고객님 상담서</h2>
+        </div>
+        <button class="btn-premium btn-secondary" style="padding: 6px 12px; border-radius: 8px;" onclick="closeModal()">
+          닫기 ✕
+        </button>
+      </div>
+
+      <div class="modal-grid">
+        <!-- 왼쪽 열: 상세 내역 및 진단 -->
+        <div class="modal-col-left">
+          <div class="form-group">
+            <span class="form-label">고객 연락처</span>
+            <div style="font-size: 1.1rem; font-weight: 600;" id="modal-phone">010-1234-5678</div>
+          </div>
+          <div class="form-group">
+            <span class="form-label">점검 및 공사 주소</span>
+            <div style="font-size: 1.05rem;" id="modal-address">서울시 마포구 창전동 100-1</div>
+          </div>
+          <div class="form-group">
+            <span class="form-label">요청 방문 시간대</span>
+            <div style="font-weight: 600; color: var(--primary);" id="modal-reserved-time">2026-05-25 (월) 11:00</div>
+          </div>
+          <div class="form-group">
+            <span class="form-label">부위 및 기본 하자 정보</span>
+            <div style="font-size: 0.95rem;"><b id="modal-location">천장</b> - <span id="modal-symptom">물이 뚝뚝 떨어짐</span></div>
+          </div>
+          <div class="form-group">
+            <span class="form-label">상세 기술 내용</span>
+            <p style="font-size: 0.95rem; line-height: 1.5; color: var(--text-muted);" id="modal-details">
+              상세 설명이 없습니다.
+            </p>
+          </div>
+
+          <!-- 상태 변경 액션 패널 -->
+          <div class="glass-panel" style="padding: 20px; background: rgba(255, 255, 255, 0.02); margin-top: 15px;">
+            <span class="form-label" style="margin-bottom: 12px;">상태 관리 조작</span>
+            <div style="display: flex; gap: 8px;" id="action-buttons-box">
+              <!-- JS 동적 버튼 매핑 -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 오른쪽 열: AI 접수 리포트 및 사진 -->
+        <div class="modal-col-right">
+          <div class="form-group">
+            <span class="form-label">📸 고객 업로드 사진</span>
+            <div id="modal-photo-container">
+              <img src="/img/placeholder.jpg" alt="고객 하자 사진" class="modal-photo" id="modal-photo-img">
+            </div>
+          </div>
+          <div class="form-group">
+            <span class="form-label">🤖 AI 접수원의 접수 리포트</span>
+            <div class="ai-summary-box" style="font-size: 0.9rem;" id="modal-ai-summary">
+              접수 내용을 분석하는 중입니다...
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 가상 알림 사운드 (HTML5 Audio) -->
+  <audio id="alert-sound" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-84.wav" preload="auto"></audio>
+  <!-- 🚨 긴급 사이렌 경보음 -->
+  <audio id="emergency-sound" src="https://assets.mixkit.co/active_storage/sfx/951/951-84.wav" preload="auto"></audio>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>

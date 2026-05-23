@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시공링크 - AI 상담 자동화 접수처</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- 헤더 영역 -->
+  <header>
+    <a href="#" class="logo" style="white-space: nowrap;">
+      <span>몰드버스터</span> AI 접수처
+    </a>
+    <div style="font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;">
+      ⚡ 곰팡이/결로/단열 정밀 분석
+    </div>
+  </header>
+
+  <!-- 메인 모바일 카드 컨테이너 -->
+  <div class="client-container">
+    <div id="step-card-box" class="glass-panel step-card">
+      
+      <!-- 상단 스텝 바 -->
+      <div class="step-indicator">
+        <div class="step-dot active" id="dot-1"></div>
+        <div class="step-dot" id="dot-2"></div>
+        <div class="step-dot" id="dot-3"></div>
+        <div class="step-dot" id="dot-4"></div>
+      </div>
+
+      <!-- AI 접수원 안내 영역 -->
+      <div class="ai-agent-container">
+        <div class="ai-avatar">🤖</div>
+        <div class="ai-bubble" id="ai-instructions">
+          안녕하세요! 곰팡이 진단/단열 시공 전문 <b>몰드버스터 AI 접수원</b>입니다.<br>
+          현장 작업 중이신 전문가님을 대신하여 상담 접수를 도와드릴게요. 먼저 고객님의 존함과 연락처를 알려주시겠어요?
+        </div>
+      </div>
+
+      <!-- 동적 콘텐츠 전환 영역 (폼) -->
+      <form id="consultation-form" onsubmit="event.preventDefault();">
+        
+        <!-- ==================== STEP 1: 고객 기본 정보 ==================== -->
+        <div class="step-content" id="step-1-content">
+          <!-- 기존 접수 확인 퀵 배너 (로컬스토리지 연동) -->
+          <div id="quick-status-banner" style="display: none; margin-bottom: 20px; font-size: 0.82rem; text-align: left; background: rgba(58, 134, 255, 0.08); padding: 12px 16px; border: 1px dashed var(--primary); border-radius: 12px; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-main); font-weight: 500;">📝 진행 중인 접수 내역이 있습니다.</span>
+            <button type="button" class="btn-premium" style="padding: 6px 10px; font-size: 0.75rem; border-radius: 6px; box-shadow: none;" onclick="openStatusTracker()">
+              상태 확인 ➔
+            </button>
+          </div>
+          <!-- 일반 vs 긴급 접수 전환 스위치 탭 -->
+          <div style="display: flex; gap: 10px; margin-bottom: 25px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 6px; border-radius: 14px;">
+            <button type="button" class="btn-premium" style="flex: 1; padding: 10px; font-size: 0.9rem; border-radius: 10px; box-shadow: none; background: var(--primary);" id="tab-normal-type" onclick="toggleConsultationType('normal')">
+              📅 일반 점검 예약
+            </button>
+            <button type="button" class="btn-premium btn-secondary" style="flex: 1; padding: 10px; font-size: 0.9rem; border-radius: 10px; box-shadow: none;" id="tab-emergency-type" onclick="toggleConsultationType('emergency')">
+              🚨 긴급 당일 출동
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="clientName">성함</label>
+            <input type="text" id="clientName" class="form-input" placeholder="홍길동" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="clientPhone">연락처</label>
+            <input type="tel" id="clientPhone" class="form-input" placeholder="010-1234-5678" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="address">시공 및 점검 주소</label>
+            <input type="text" id="address" class="form-input" placeholder="서울시 마포구 독막로 100, 301호" required>
+          </div>
+
+          <!-- 🚨 긴급 접수 전용 상세 입력 및 고지 박스 (기본 숨김) -->
+          <div id="emergency-form-section" style="display: none; margin-top: 10px;">
+            <div class="form-group">
+              <label class="form-label" for="emergencyDetails">🚨 현재 긴급 상황 요약 (선택)</label>
+              <textarea id="emergencyDetails" class="form-textarea" rows="2" placeholder="예: 천장에서 갑자기 물이 폭포처럼 쏟아집니다, 방 전체에 곰팡이가 피어 호흡이 어렵습니다."></textarea>
+            </div>
+            
+            <!-- 긴급 당일 방문 출장비 150,000원 고지 및 동의 -->
+            <div class="glass-panel" style="padding: 16px; margin: 20px 0; font-size: 0.85rem; line-height: 1.6; text-align: left; background: rgba(239, 68, 68, 0.05); border-color: rgba(239, 68, 68, 0.25);">
+              <div style="display: flex; gap: 10px; align-items: flex-start;">
+                <input type="checkbox" id="emergency-fee-agree" style="margin-top: 4px;">
+                <label for="emergency-fee-agree" style="cursor: pointer; color: var(--text-main); font-weight: 500;">
+                  ⚠️ <b>[필독] 긴급 당일 방문 동의서</b><br>
+                  단순 문의/전화가 아닌 <b>긴급 당일 즉시 방문 요청</b>은 현장 전문가의 일정을 즉각 조정하여 당일 내 신속 방문을 조건으로 진행되며, 일반 출장비가 아닌 <b>긴급 출장비 150,000원</b>이 발생하고 청구됨에 엄격히 동의합니다.
+                </label>
+              </div>
+            </div>
+
+            <button type="button" class="btn-premium" style="width: 100%; background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);" onclick="submitEmergencyConsultation()">
+              🚨 긴급 당일 출동 요청 완료 ➔
+            </button>
+          </div>
+
+          <!-- 일반 예약일 때 노출되는 다음단계 버튼 -->
+          <button type="button" class="btn-premium" style="width: 100%; margin-top: 15px;" id="btn-step1-next" onclick="goToNextStep(1)">
+            다음 단계로 진행하기 ➔
+          </button>
+        </div>
+
+        <!-- ==================== STEP 2: 하자 부위 및 증상 선택 ==================== -->
+        <div class="step-content" id="step-2-content" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">점검 및 공사가 필요한 부위</label>
+            <div class="option-grid" id="location-options">
+              <div class="option-card" onclick="selectOption('location', '천장', this)">
+                <span class="option-icon">🏠</span>
+                <span class="option-label">천장</span>
+              </div>
+              <div class="option-card" onclick="selectOption('location', '벽면', this)">
+                <span class="option-icon">🧱</span>
+                <span class="option-label">벽면</span>
+              </div>
+              <div class="option-card" onclick="selectOption('location', '바닥', this)">
+                <span class="option-icon">🪵</span>
+                <span class="option-label">바닥</span>
+              </div>
+              <div class="option-card" onclick="selectOption('location', '베란다/발코니', this)">
+                <span class="option-icon">☀️</span>
+                <span class="option-label">베란다</span>
+              </div>
+              <div class="option-card" onclick="selectOption('location', '욕실/화장실', this)">
+                <span class="option-icon">🛁</span>
+                <span class="option-label">욕실</span>
+              </div>
+              <div class="option-card" onclick="selectOption('location', '기타', this)">
+                <span class="option-icon">❓</span>
+                <span class="option-label">기타</span>
+              </div>
+            </div>
+            <input type="hidden" id="selected-location" required>
+          </div>
+
+          <div class="form-group" style="margin-top: 25px;">
+            <label class="form-label">현재 나타나는 문제 증상</label>
+            <div class="option-grid" id="symptom-options">
+              <div class="option-card" onclick="selectOption('symptom', '물이 뚝뚝 떨어짐', this)">
+                <span class="option-icon">💧</span>
+                <span class="option-label">물이 샘</span>
+              </div>
+              <div class="option-card" onclick="selectOption('symptom', '벽지/벽면 젖음 및 변색', this)">
+                <span class="option-icon">📉</span>
+                <span class="option-label">벽면 젖음</span>
+              </div>
+              <div class="option-card" onclick="selectOption('symptom', '곰팡이 번식', this)">
+                <span class="option-icon">🍄</span>
+                <span class="option-label">곰팡이</span>
+              </div>
+              <div class="option-card" onclick="selectOption('symptom', '타일 균열/들뜸', this)">
+                <span class="option-icon">⚡</span>
+                <span class="option-label">타일 균열</span>
+              </div>
+              <div class="option-card" onclick="selectOption('symptom', '기타 불편 사항', this)">
+                <span class="option-icon">🛠️</span>
+                <span class="option-label">기타</span>
+              </div>
+            </div>
+            <input type="hidden" id="selected-symptom" required>
+          </div>
+
+          <div class="form-group" style="margin-top: 25px;">
+            <label class="form-label" for="details">상세 내용 설명 (선택)</label>
+            <textarea id="details" class="form-textarea" rows="3" placeholder="예: 3일 전부터 비가 오면서 안방 천장에 물방울이 맺히고 곰팡이가 생기기 시작했습니다."></textarea>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="button" class="btn-premium btn-secondary" style="flex: 1;" onclick="goToPrevStep(2)">
+              이전으로
+            </button>
+            <button type="button" class="btn-premium" style="flex: 2;" onclick="goToNextStep(2)">
+              다음 단계로 ➔
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== STEP 3: 현장 사진 업로드 ==================== -->
+        <div class="step-content" id="step-3-content" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">현장 상황 파악용 사진 업로드</label>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; text-align: left; line-height: 1.4;">
+              💡 젖어 있는 부위나 곰팡이가 핀 곳을 정면/멀리서 각각 찍어 올려주시면, AI가 전문가에게 전달할 핵심 리포트를 훨씬 정확하게 구성해 줍니다!
+            </div>
+            
+            <div class="upload-zone" id="drop-zone" onclick="document.getElementById('photo-input').click()">
+              <span class="upload-icon">📸</span>
+              <span class="upload-label" id="upload-label-text">여기를 터치하여 사진을 촬영하거나 선택하세요.</span>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">(10MB 이하 이미지 파일)</span>
+              <img id="image-preview" class="upload-preview" alt="업로드 이미지 미리보기">
+            </div>
+            <input type="file" id="photo-input" style="display: none;" accept="image/*" onchange="previewImage(this)">
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="button" class="btn-premium btn-secondary" style="flex: 1;" onclick="goToPrevStep(3)">
+              이전으로
+            </button>
+            <button type="button" class="btn-premium" style="flex: 2;" onclick="goToNextStep(3)">
+              일정 조율로 이동 ➔
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== STEP 4: 방문 진단 예약 ==================== -->
+        <div class="step-content" id="step-4-content" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">원하시는 방문 진단 날짜</label>
+            <div class="calendar-grid" id="calendar-element">
+              <!-- JS에서 동적으로 영업일 기준 캘린더 생성 -->
+            </div>
+            <input type="hidden" id="selected-date">
+          </div>
+
+          <div class="form-group" style="margin-top: 25px;">
+            <label class="form-label">방문 희망 시간대</label>
+            <div class="time-slots" id="time-slots-container">
+              <!-- JS에서 동적으로 시간 목록 생성 -->
+            </div>
+            <input type="hidden" id="selected-time">
+            
+            <!-- 시간 직접 작성 인풋 (기본 숨김) -->
+            <div id="custom-time-box" style="display: none; margin-top: 15px; animation: slideIn 0.3s ease-in-out;">
+              <label class="form-label" style="font-size: 0.8rem; color: var(--accent);">직접 시간대 입력</label>
+              <input type="text" id="custom-time-input" class="form-input" placeholder="예: 오후 2시 이후 아무때나 / 아침 일찍(8시)">
+            </div>
+          </div>
+
+          <div style="margin-top: 20px; font-size: 0.85rem; color: #f59e0b; text-align: left; background: rgba(245, 158, 11, 0.08); border-left: 3px solid #f59e0b; padding: 12px 16px; border-radius: 8px; line-height: 1.5;">
+            ⚠️ <b>[필독] 방문 일정 조율 안내</b><br>
+            선택하신 일자는 '방문 희망 일정'입니다. 실제 현장 상황 및 전문가의 시공 스케줄에 따라 <b>방문 날짜 및 시간 조율이 필요할 수 있음</b>을 미리 안내해 드립니다. 접수 완료 후 신속히 유선으로 연락드려 일정을 최종 조율하고 확정해 드립니다.
+          </div>
+
+          <div class="glass-panel" style="padding: 16px; margin: 20px 0; font-size: 0.85rem; line-height: 1.6; text-align: left; background: rgba(58, 134, 255, 0.05); border-color: rgba(58, 134, 255, 0.15);">
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <input type="checkbox" id="travel-fee-agree" style="margin-top: 4px;" required>
+              <label for="travel-fee-agree" style="cursor: pointer; color: var(--text-main); font-weight: 500;">
+                방문 정밀진단 출장비 <b><span id="travel-fee-display">30,000</span>원</b> 안내 확인 및 동의 (시공 확정 시 공사비에서 전액 차감/포함해 드립니다.)
+              </label>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="button" class="btn-premium btn-secondary" style="flex: 1;" onclick="goToPrevStep(4)">
+              이전으로
+            </button>
+            <button type="button" class="btn-premium" style="flex: 2; background: linear-gradient(135deg, var(--accent), #049f75); box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);" onclick="submitConsultation()">
+              최종 접수 완료하기 🎉
+            </button>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- ==================== STEP 5: 최종 접수 성공 화면 (대기 모드 및 결과) ==================== -->
+      <div class="step-content" id="step-success-content" style="display: none;">
+        <div style="font-size: 3.5rem; margin-bottom: 20px;">✅</div>
+        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 10px; color: var(--accent);">
+          상담 접수가 완료되었습니다!
+        </h2>
+        <div style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px;">
+          시공 현장 작업으로 바쁘신 전문가님께 <b>AI 접수원이 아래의 요약 본문과 사진을 정리하여 알림을 전달</b>해 드렸습니다.<br>
+          <span style="color:#f59e0b; font-weight:600; display:block; margin: 10px 0;">⚠️ [중요 안내] 고객님이 선택하신 방문 희망 일정은 전문가의 시공 동선과 대조한 뒤, 조속히 전화를 드려 최종 협의 및 조율하여 확정해 드립니다.</span>
+          조금만 기다려 주시면 전문가님께서 직접 연락해 드리겠습니다!
+        </div>
+
+        <div class="ai-summary-box" style="text-align: left; font-size: 0.9rem;" id="success-summary-box">
+          <!-- AI 접수 요약 렌더링 영역 -->
+          상담 요약본을 가져오는 중입니다...
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 30px;">
+          <button type="button" class="btn-premium" style="width: 100%;" id="btn-view-tracker" onclick="openStatusTracker()">
+            🔍 실시간 접수 상태 확인하기
+          </button>
+          <!-- 🌟 링크 공유/보관 버튼 추가 -->
+          <button type="button" class="btn-premium" style="width: 100%; background: linear-gradient(135deg, var(--accent), #049f75); box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);" onclick="copyStatusLink()">
+            🔗 내 접수 상태 확인 링크 복사/공유하기
+          </button>
+          <button type="button" class="btn-premium btn-secondary" style="width: 100%;" onclick="window.location.reload()">
+            새로운 상담 접수하기
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== 실시간 접수 상태 추적기 (Status Tracker) 화면 ==================== -->
+      <div class="step-content" id="step-status-tracker" style="display: none;">
+        
+        <!-- 헤더 영역 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--primary); text-align: left; margin: 0;">
+            접수 상태 추적
+          </h2>
+          <button type="button" class="btn-premium btn-secondary" id="btn-back-to-list" style="display: none; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px;" onclick="showTrackerListView()">
+            📋 목록보기
+          </button>
+        </div>
+        
+        <p style="color: var(--text-muted); font-size: 0.85rem; text-align: left; margin-bottom: 20px;" id="tracker-instructions">
+          전문가님의 예약 관리 시스템과 연동되어 실시간 상태를 추적합니다.
+        </p>
+
+        <!-- ① 다중 접수 목록 뷰 -->
+        <div id="tracker-list-view" style="display: none;">
+          <div id="tracker-items-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;">
+            <!-- 접수 내역 카드 목록이 동적으로 렌더링됨 -->
+          </div>
+          <button type="button" class="btn-premium" style="width: 100%; margin-bottom: 10px; background: linear-gradient(135deg, var(--accent), #049f75); box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);" onclick="copyMultipleStatusLink()">
+            🔗 접수 목록 전체 공유/보관하기
+          </button>
+          <button type="button" class="btn-premium btn-secondary" style="width: 100%;" onclick="backToMain()">
+            메인으로 돌아가기
+          </button>
+        </div>
+
+        <!-- ② 단일 접수 상세 뷰 -->
+        <div id="tracker-detail-view" style="display: none;">
+          <!-- 진행 게이지 타임라인 -->
+          <div class="tracker-steps">
+            <div class="tracker-progress-line" id="tracker-progress"></div>
+            <div class="tracker-step" id="t-step-0">
+              <div class="tracker-node">1</div>
+              <div class="tracker-label" style="font-size: 0.75rem;">접수완료</div>
+            </div>
+            <div class="tracker-step" id="t-step-1">
+              <div class="tracker-node">2</div>
+              <div class="tracker-label" style="font-size: 0.75rem;">방문확정</div>
+            </div>
+            <div class="tracker-step" id="t-step-2">
+              <div class="tracker-node">3</div>
+              <div class="tracker-label" style="font-size: 0.75rem;">시공진행</div>
+            </div>
+            <div class="tracker-step" id="t-step-3">
+              <div class="tracker-node">4</div>
+              <div class="tracker-label" style="font-size: 0.75rem;">최종완료</div>
+            </div>
+          </div>
+
+          <!-- 실시간 세부 현황 카드 -->
+          <div class="glass-panel" style="padding: 20px; text-align: left; margin-bottom: 25px; background: rgba(255, 255, 255, 0.02); border-color: rgba(255, 255, 255, 0.1);">
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">📋 예약자 정보</div>
+            <div style="font-size: 1rem; font-weight: 600; margin-bottom: 15px;" id="tracker-client-info">홍길동 (010-1234-5678)</div>
+
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">🕒 현재 확정된 방문 일정</div>
+            <div style="font-size: 1.05rem; font-weight: 700; color: var(--primary); margin-bottom: 15px;" id="tracker-reserved-date">일정 검토 중...</div>
+
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">📍 시공/진단 주소</div>
+            <div style="font-size: 0.95rem; margin-bottom: 15px;" id="tracker-address">서울시 마포구 창전동 100-1</div>
+
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">🤖 AI 접수 리포트 요약</div>
+            <div class="ai-summary-box" style="font-size: 0.85rem; padding: 12px 16px; background: rgba(58, 134, 255, 0.04); border-color: rgba(58, 134, 255, 0.1);" id="tracker-ai-summary">
+              내용을 가져오는 중입니다...
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button type="button" class="btn-premium" style="width: 100%; background: linear-gradient(135deg, var(--accent), #049f75); box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);" onclick="copyStatusLink()">
+              🔗 조회 링크 복사/공유하기
+            </button>
+            <div style="display: flex; gap: 10px;">
+              <button type="button" class="btn-premium btn-secondary" style="flex: 1;" id="btn-tracker-back" onclick="backToMainOrList()">
+                뒤로가기
+              </button>
+              <button type="button" class="btn-premium" style="flex: 1;" onclick="refreshTracker()">
+                🔄 새로고침
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <footer style="padding: 30px; text-align: center; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-glass); margin-top: auto;">
+    © 2026 SigongLink Inc. All rights reserved.
+  </footer>
+
+  <script src="/js/client.js"></script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>몰드버스터 (MoldBuster) 홈페이지 통합 시뮬레이션</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Malgun Gothic', sans-serif;
+      background: #f1f5f9;
+      color: #334155;
+    }
+    .header {
+      background: #0f172a;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #10b981;
+    }
+    .nav {
+      display: flex;
+      gap: 20px;
+    }
+    .hero {
+      background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1200&q=80');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      text-align: center;
+      padding: 100px 20px;
+    }
+    .hero h1 {
+      font-size: 42px;
+      margin-bottom: 20px;
+    }
+    .hero p {
+      font-size: 18px;
+      color: #94a3b8;
+      max-width: 600px;
+      margin: 0 auto 30px;
+    }
+    .content {
+      max-width: 1000px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .card h3 {
+      margin-top: 0;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 가상 몰드버스터 헤더 -->
+  <div class="header">
+    <div class="logo">MoldBuster 곰팡이/누수 케어</div>
+    <div class="nav">
+      <span>회사소개</span>
+      <span>시공사례</span>
+      <span>진단견적요청</span>
+      <span>고객센터</span>
+    </div>
+  </div>
+
+  <!-- 히어로 섹션 -->
+  <div class="hero">
+    <h1>곰팡이·누수 방제 솔루션 전문</h1>
+    <p>
+      몰드버스터는 친환경 단열시공 및 하이테크 진단 장비로 결로와 누수를 근본적으로 파괴합니다. 현장 전문가가 직접 분석하여 맞춤 해결책을 제안합니다.
+    </p>
+    <button style="background:#10b981; color:white; border:none; padding:12px 28px; font-size:16px; border-radius:6px; cursor:pointer; font-weight:bold;">
+      무료 전화상담
+    </button>
+  </div>
+
+  <!-- 주요 서비스 피처 -->
+  <div class="content">
+    <h2 style="text-align:center; margin-bottom:40px; font-size:28px;">몰드버스터의 3대 핵심 케어</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>💧 1. 누수 및 방수 진단</h3>
+        <p>열화상 카메라 및 배관 탐지기를 통해 미세 누수 지점까지 완벽하게 추적하고 공사해 드립니다.</p>
+      </div>
+      <div class="card">
+        <h3>🧱 2. 결로/단열 공사</h3>
+        <p>기후 변화와 내부 습도 분포를 정밀 계산하여 재발 없는 특허 단열 보드로 벽체를 보강합니다.</p>
+      </div>
+      <div class="card">
+        <h3>🍄 3. 곰팡이 멸균 박멸</h3>
+        <p>단순 제거를 넘어 벽체 내경의 균사체까지 고온 스팀 및 친환경 약품으로 뿌리째 소독합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- 📢 실제 moldbuster.kr 에 붙여넣을 코드 한 줄!                     -->
+  <!-- ================================================================= -->
+  <script src="/widget.js"></script>
+
+</body>
+</html>
