@@ -235,11 +235,18 @@
             </p>
           </div>
 
-          <!-- 상태 변경 액션 패널 -->
+          <!-- 상태 변경 및 삭제 액션 패널 -->
           <div class="glass-panel" style="padding: 20px; background: rgba(255, 255, 255, 0.02); margin-top: 15px;">
             <span class="form-label" style="margin-bottom: 12px;">상태 관리 조작</span>
             <div style="display: flex; gap: 8px;" id="action-buttons-box">
               <!-- JS 동적 버튼 매핑 -->
+            </div>
+            
+            <!-- 🗑️ 접수 내역 삭제 영역 -->
+            <div style="margin-top: 18px; border-top: 1px dashed rgba(255, 255, 255, 0.08); padding-top: 15px; display: flex; justify-content: flex-end;">
+              <button type="button" class="btn-premium" style="background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2); font-size: 0.8rem; padding: 8px 16px; border-radius: 8px; font-weight: 600;" id="btn-delete-consultation" onclick="deleteConsultation()">
+                🗑️ 접수 내역 영구 삭제
+              </button>
             </div>
           </div>
         </div>

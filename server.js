@@ -315,6 +315,39 @@ app.get('/api/consultations/:id', (req, res) => {
   res.json(item);
 });
 
+// 2-2. 개별 상담 접수 내역 삭제 API (관리자용)
+app.delete('/api/consultations/:id', (req, res) => {
+  const { id } = req.params;
+  const consultations = readJSON(CONSULTATIONS_FILE);
+  const index = consultations.findIndex(c => c.id === id);
+  
+  if (index === -1) {
+    return res.status(404).json({ error: "해당 상담 건을 찾을 수 없습니다." });
+  }
+  
+  // 데이터 삭제 및 관련 이미지 파일 디스크 정리
+  const item = consultations[index];
+  if (item.photoUrl) {
+    // photoUrl 형식: /uploads/123-456.jpg -> 실제 uploads 경로 매핑
+    const photoName = path.basename(item.photoUrl);
+    const photoPath = path.join(UPLOADS_DIR, photoName);
+    
+    if (fs.existsSync(photoPath)) {
+      try {
+        fs.unlinkSync(photoPath);
+        console.log(`🗑️ 디스크에서 실제 업로드 사진 파일 삭제 완료: ${photoPath}`);
+      } catch (err) {
+        console.error("실제 업로드 사진 파일 삭제 중 에러 발생:", err);
+      }
+    }
+  }
+
+  consultations.splice(index, 1);
+  writeJSON(CONSULTATIONS_FILE, consultations);
+  
+  res.json({ message: "상담 접수 내역이 성공적으로 삭제되었습니다." });
+});
+
 // 3. 상담 상태 및 예약일 변경 API (관리자용)
 app.put('/api/consultations/:id', (req, res) => {
   const { id } = req.params;

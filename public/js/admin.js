@@ -367,3 +367,40 @@ async function saveSettings() {
     alert("서버 연결 실패");
   }
 }
+
+// 🗑️ 접수 내역 영구 삭제 요청 API (관리자 전용)
+async function deleteConsultation() {
+  if (!selectedItem) return;
+  
+  const id = selectedItem.id;
+  const clientName = selectedItem.clientName;
+  
+  const confirmDelete = confirm(`⚠️ [경고: 영구 삭제] 정말로 ${clientName} 고객님의 상담 접수 내역을 삭제하시겠습니까?\n\n삭제된 데이터와 업로드 사진 파일은 즉시 파기되며 절대 복구할 수 없습니다.`);
+  
+  if (!confirmDelete) return;
+  
+  try {
+    const res = await fetch(`/api/consultations/${id}`, {
+      method: 'DELETE'
+    });
+    
+    if (res.ok) {
+      alert(`🗑️ ${clientName} 고객님의 접수 내역이 완벽히 삭제되었습니다.`);
+      closeModal('force');
+      
+      // 로컬 메모리에서도 즉각 제거
+      consultations = consultations.filter(c => c.id !== id);
+      knownIds.delete(id);
+      
+      // 화면 즉시 리렌더링 및 동기화
+      renderKanbanBoard();
+      syncData();
+    } else {
+      const err = await res.json();
+      alert(`삭제 실패: ${err.error || '알 수 없는 서버 에러'}`);
+    }
+  } catch (error) {
+    console.error("삭제 요청 중 오류 발생:", error);
+    alert("서버 연결 불안정으로 인해 내역을 삭제하지 못했습니다.");
+  }
+}
